@@ -28,15 +28,34 @@ export default function AdminPending() {
 
   const approveMutation = useMutation({
     mutationFn: async (action) => {
+      const { data: classroom, error: classroomFetchError } = await supabase
+        .from('Classroom')
+        .select('id, total_points, monthly_points')
+        .eq('id', action.classroom_id)
+        .single();
+
+      if (classroomFetchError) throw classroomFetchError;
+
       const { error } = await supabase
         .from('EcoAction')
         .update({ status: "aprovada" })
         .eq('id', action.id);
       if (error) throw error;
+
+      const { error: classroomUpdateError } = await supabase
+        .from('Classroom')
+        .update({
+          total_points: (classroom?.total_points || 0) + (action.points || 0),
+          monthly_points: (classroom?.monthly_points || 0) + (action.points || 0),
+        })
+        .eq('id', action.classroom_id);
+
+      if (classroomUpdateError) throw classroomUpdateError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pending-actions"] });
       queryClient.invalidateQueries({ queryKey: ["admin-classrooms"] });
+      queryClient.invalidateQueries({ queryKey: ["ranking"] });
       toast.success("Ação aprovada e pontos atribuídos!");
     },
   });
