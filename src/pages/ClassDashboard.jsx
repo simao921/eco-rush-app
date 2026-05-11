@@ -152,6 +152,19 @@ export default function ClassDashboard() {
       }]).select().single();
 
       if (actionErr) throw actionErr;
+      const nextTotalPoints = (freshClassroom?.total_points ?? classroom.total_points ?? 0) + actionDef.points;
+      const nextMonthlyPoints = (freshClassroom?.monthly_points ?? classroom.monthly_points ?? 0) + actionDef.points;
+
+      const { error: classroomErr } = await supabase
+        .from('Classroom')
+        .update({
+          total_points: nextTotalPoints,
+          monthly_points: nextMonthlyPoints,
+        })
+        .eq('id', classroom.id);
+
+      if (classroomErr) throw classroomErr;
+
       const streakDay = computeApprovedStreak(actions, [newAction.created_date || new Date().toISOString()]);
 
       // Publish to global feed
@@ -187,6 +200,7 @@ export default function ClassDashboard() {
       queryClient.invalidateQueries({ queryKey: ["actions", classroom.id] });
       queryClient.invalidateQueries({ queryKey: ["classroom", classroom.id] });
       queryClient.invalidateQueries({ queryKey: ["feed"] });
+      queryClient.invalidateQueries({ queryKey: ["ranking"] });
       toast.success(`🚀 Ação registada com sucesso! +${newAction?.points || 0} pontos!`);
     },
   });
