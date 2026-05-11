@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { getPointsLevel } from "@/lib/ecoConstants";
 import { Button } from "@/components/ui/button";
 import { Award, Download } from "lucide-react";
-import { jsPDF } from "jsPDF";
+import jsPDF from "jspdf";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 
