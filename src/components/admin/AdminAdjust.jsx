@@ -112,7 +112,7 @@ export default function AdminAdjust() {
       const since = new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from('EcoAction')
-        .update({ registered_by: "admin_reset" })
+        .update({ registered_by: "professor" })
         .eq('classroom_id', classId)
         .eq('registered_by', 'turma')
         .gte('created_date', since)
