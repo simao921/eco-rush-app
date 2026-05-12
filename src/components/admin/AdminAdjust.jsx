@@ -114,23 +114,24 @@ export default function AdminAdjust() {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label className="font-body">Operação</Label>
-              <Select value={adjustType} onValueChange={setAdjustType}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="add">
-                    <span className="flex items-center gap-1">
-                      <Plus className="h-3 w-3" /> Adicionar
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="remove">
-                    <span className="flex items-center gap-1">
-                      <Minus className="h-3 w-3" /> Remover
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Button 
+                  type="button" 
+                  variant={adjustType === "add" ? "default" : "outline"} 
+                  className={adjustType === "add" ? "bg-green-600 hover:bg-green-700 flex-1" : "flex-1"}
+                  onClick={() => setAdjustType("add")}
+                >
+                  <Plus className="h-4 w-4 mr-1" /> Dar
+                </Button>
+                <Button 
+                  type="button" 
+                  variant={adjustType === "remove" ? "destructive" : "outline"} 
+                  className="flex-1"
+                  onClick={() => setAdjustType("remove")}
+                >
+                  <Minus className="h-4 w-4 mr-1" /> Tirar
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label className="font-body">Pontos</Label>
