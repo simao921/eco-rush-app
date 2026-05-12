@@ -92,7 +92,9 @@ export default function VideoRecorder({ onVideoAnalyzed, onVideoRejected, onCanc
       setLoadingText("IA a validar acao (aguarda)...");
 
       const result = await analyzeWithAI({
-        prompt: `Analisa este vídeo. ${actionPrompt} Responde APENAS em JSON: {"valid":boolean, "reason":"string"}. IMPORTANTE: No campo 'reason', justifica a tua decisão falando diretamente para os alunos. NUNCA uses as palavras 'frame', 'frames', 'imagem' ou 'fotografia'. Refere-te sempre ao conteúdo como 'no vídeo' ou 'a vossa ação'.`,
+        prompt: `Analisa este vídeo. ${actionPrompt} Responde APENAS em JSON: {"valid":boolean, "reason":"string"}.
+IMPORTANTE: No campo 'reason', justifica a tua decisão falando diretamente para os alunos. NUNCA uses as palavras 'frame', 'frames', 'imagem' ou 'fotografia'. Refere-te sempre ao conteúdo como 'no vídeo' ou 'a vossa ação'.
+CRÍTICO ANTIFRAUDE: Se detetares que este vídeo está a ser filmado a partir de outro ecrã (como um telemóvel, tablet, computador ou TV a mostrar um vídeo já gravado), REJEITA IMEDIATAMENTE (valid:false) e diz que não aceitas vídeos de outros ecrãs.`,
         images: frames,
       });
 
