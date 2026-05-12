@@ -14,7 +14,8 @@ import { pt } from "date-fns/locale";
 export default function Home() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
-  const { enterClassroom } = useClassroom();
+  const [rememberMe, setRememberMe] = useState(false);
+  const { enterClassroom, saveSessionLong } = useClassroom();
   const navigate = useNavigate();
 
   const { data: newsPosts = [] } = useQuery({
@@ -55,7 +56,11 @@ export default function Home() {
       toast.error("Código não encontrado. Verifica e tenta novamente.");
       return;
     }
-    enterClassroom(classrooms[0]);
+    if (rememberMe) {
+      saveSessionLong(classrooms[0]);
+    } else {
+      enterClassroom(classrooms[0]);
+    }
     navigate("/turma");
   };
 
@@ -147,6 +152,17 @@ export default function Home() {
                 {loading ? "A verificar..." : "Entrar na turma"}
                 <ArrowRight className="h-4 w-4" />
               </Button>
+              <label className="flex items-center gap-2 cursor-pointer justify-center pt-1">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded accent-primary cursor-pointer"
+                />
+                <span className="text-xs font-body text-muted-foreground select-none">
+                  Lembrar-me neste dispositivo por 30 dias
+                </span>
+              </label>
             </form>
           </motion.div>
 
