@@ -161,18 +161,28 @@ export default function ClassDashboard() {
       if (rpcErr) {
         // Fallback: buscar pontos atuais e fazer UPDATE direto
         console.warn("RPC não disponível, a usar fallback UPDATE:", rpcErr.message);
-        const { data: live } = await supabase
+        
+        const { data: live, error: liveErr } = await supabase
           .from('Classroom')
           .select('total_points, monthly_points')
           .eq('id', classroom.id)
           .single();
-        await supabase
+        
+        if (liveErr) throw new Error("Erro ao buscar pontos atuais: " + liveErr.message);
+
+        const { data: updated, error: updErr } = await supabase
           .from('Classroom')
           .update({
-            total_points:   (live?.total_points   ?? 0) + actionDef.points,
-            monthly_points: (live?.monthly_points ?? 0) + actionDef.points,
+            total_points:   (live.total_points   ?? 0) + actionDef.points,
+            monthly_points: (live.monthly_points ?? 0) + actionDef.points,
           })
-          .eq('id', classroom.id);
+          .eq('id', classroom.id)
+          .select();
+
+        if (updErr) throw new Error("Erro ao atualizar pontos: " + updErr.message);
+        if (!updated || updated.length === 0) {
+          throw new Error("Erro de permissão: A tabela Classroom está protegida por RLS. Vai ao Supabase e desativa o RLS ou cria uma política de UPDATE.");
+        }
       }
 
       const streakDay = computeApprovedStreak(actions, [newAction.created_date || new Date().toISOString()]);
