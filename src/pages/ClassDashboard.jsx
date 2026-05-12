@@ -155,15 +155,19 @@ export default function ClassDashboard() {
       const nextTotalPoints = (freshClassroom?.total_points ?? classroom.total_points ?? 0) + actionDef.points;
       const nextMonthlyPoints = (freshClassroom?.monthly_points ?? classroom.monthly_points ?? 0) + actionDef.points;
 
-      const { error: classroomErr } = await supabase
+      const { data: updatedClassroom, error: classroomErr } = await supabase
         .from('Classroom')
         .update({
           total_points: nextTotalPoints,
           monthly_points: nextMonthlyPoints,
         })
-        .eq('id', classroom.id);
+        .eq('id', classroom.id)
+        .select();
 
       if (classroomErr) throw classroomErr;
+      if (!updatedClassroom || updatedClassroom.length === 0) {
+        throw new Error("Não foi possível atualizar os pontos da turma. Verifica se tens o RLS desativado ou as políticas de UPDATE corretas na tabela Classroom.");
+      }
 
       const streakDay = computeApprovedStreak(actions, [newAction.created_date || new Date().toISOString()]);
 
