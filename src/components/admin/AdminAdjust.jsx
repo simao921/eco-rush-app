@@ -109,20 +109,29 @@ export default function AdminAdjust() {
 
   const resetLimitsMutation = useMutation({
     mutationFn: async (classId) => {
-      // Set recent actions to 'admin_reset' so they don't count towards the 'turma' limit
       const since = new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString();
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('EcoAction')
         .update({ registered_by: "admin_reset" })
         .eq('classroom_id', classId)
         .eq('registered_by', 'turma')
-        .gte('created_date', since);
+        .gte('created_date', since)
+        .select();
+        
       if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error("Não foram encontradas ações recentes bloqueadas para esta turma.");
+      }
+      return data.length;
     },
-    onSuccess: () => {
+    onSuccess: (count) => {
       queryClient.invalidateQueries({ queryKey: ["actions"] });
-      toast.success("Limites repostos! A turma já pode jogar novamente.");
+      toast.success(`Limites repostos! (${count} ações desbloqueadas). A turma já pode jogar.`);
     },
+    onError: (error) => {
+      window.alert("Não foi possível redefinir os limites: " + error.message);
+      console.error(error);
+    }
   });
 
   const handleSubmit = (e) => {
