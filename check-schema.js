@@ -7,12 +7,11 @@ const env = fs.readFileSync('.env', 'utf8').split('\n').reduce((acc, line) => {
   return acc;
 }, {});
 
-const supabase = createClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_ANON_KEY);
-
-async function checkCols() {
-  const { data, error } = await supabase.rpc('get_ecoaction_columns'); // Probably doesn't exist
-  // We can just try to insert a minimal row and see if it works
-  console.log("Checking EcoAction schema...");
+async function checkColumns() {
+  const res = await fetch(`${env.VITE_SUPABASE_URL}/rest/v1/?apikey=${env.VITE_SUPABASE_ANON_KEY}`);
+  const openapi = await res.json();
+  const ecoActionDef = openapi.definitions?.EcoAction || openapi.components?.schemas?.EcoAction;
+  console.log("EcoAction columns:", JSON.stringify(ecoActionDef, null, 2));
 }
 
-checkCols();
+checkColumns();

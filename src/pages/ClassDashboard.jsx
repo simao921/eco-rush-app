@@ -21,15 +21,14 @@ import { toast } from "sonner";
 import { Clock, History, Zap, BarChart2, Globe, Flame } from "lucide-react";
 import { motion } from "framer-motion";
 
-// How many times each action can be registered per window (by turma)
 const ACTION_LIMITS = {
-  apanhar_lixo:            { max: 3, windowHours: 4 },
-  reciclagem_correta:      { max: 2, windowHours: 24 },
-  apagar_luzes:            { max: 2, windowHours: 24 },
-  sala_limpa:              { max: 1, windowHours: 24 },
-  reducao_desperdicio:     { max: 1, windowHours: 24 },
-  participacao_acoes:      { max: 1, windowHours: 168 },
-  iniciativas_espontaneas: { max: 1, windowHours: 168 },
+  apanhar_lixo:            { max: 3, windowHours: 1 },
+  reciclagem_correta:      { max: 2, windowHours: 1 },
+  apagar_luzes:            { max: 2, windowHours: 1 },
+  sala_limpa:              { max: 1, windowHours: 1 },
+  reducao_desperdicio:     { max: 1, windowHours: 1 },
+  participacao_acoes:      { max: 1, windowHours: 1 },
+  iniciativas_espontaneas: { max: 1, windowHours: 1 },
 };
 
 function getUsedCount(actions = [], actionKey, windowHours) {
@@ -145,10 +144,7 @@ export default function ClassDashboard() {
         registered_by: "turma"
       }]).select().single();
 
-      if (actionErr) {
-        window.alert("Erro ao criar ação: " + actionErr.message);
-        throw actionErr;
-      }
+      if (actionErr) throw actionErr;
 
       // Tentar atualização direta simplificada
       const { data: live, error: liveErr } = await supabase
@@ -157,10 +153,7 @@ export default function ClassDashboard() {
         .eq('id', classroom.id)
         .single();
       
-      if (liveErr) {
-        window.alert("Erro ao ler pontos da BD: " + liveErr.message);
-        throw liveErr;
-      }
+      if (liveErr) throw liveErr;
 
       const { data: updated, error: updErr } = await supabase
         .from('Classroom')
@@ -172,14 +165,10 @@ export default function ClassDashboard() {
         .eq('id', classroom.id)
         .select();
 
-      if (updErr) {
-        window.alert("Erro ao gravar pontos: " + updErr.message);
-        throw updErr;
-      }
+      if (updErr) throw updErr;
 
       if (!updated || updated.length === 0) {
-        window.alert("Erro: A base de dados não permitiu gravar. Verificaste o RLS?");
-        throw new Error("Zero rows updated");
+        throw new Error("Zero rows updated. Verificaste o RLS?");
       }
 
       const streakDay = computeApprovedStreak(actions, [newAction.created_date || new Date().toISOString()]);
@@ -253,17 +242,6 @@ export default function ClassDashboard() {
 
       <EcoHeader />
       <main className="relative z-10 max-w-2xl mx-auto px-4 py-8 space-y-6">
-
-        {/* Botão de Teste Temporário */}
-        <div className="flex justify-center mb-4">
-          <Button 
-            onClick={() => registerMutation.mutate({ actionKey: 'apagar_luzes', aiResult: { valid: true, reason: 'Teste manual', photo_url: null, video_url: null } })}
-            variant="outline"
-            className="bg-yellow-500/20 border-yellow-500 text-yellow-700 font-bold"
-          >
-            ⚠️ TESTE +1 PT (Clica aqui para testar a BD)
-          </Button>
-        </div>
 
         {/* Hero banner */}
         <motion.div
