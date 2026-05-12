@@ -24,9 +24,11 @@ export default function PointsBadge({ points, showLevel = true }) {
       {/* Ring + number */}
       <div className="relative">
         <div className={`p-1.5 rounded-full bg-gradient-to-br ${colors.ring} shadow-2xl ${colors.glow}`}>
-          <div className="h-24 w-24 rounded-full bg-background flex flex-col items-center justify-center">
-            <span className="font-heading font-black text-3xl text-foreground leading-none">
-              {points || 0}
+          <div className="h-24 w-24 rounded-full bg-background flex flex-col items-center justify-center px-2 text-center">
+            <span className={`font-heading font-black text-foreground leading-none tracking-tighter ${
+              points > 999999 ? 'text-xl' : points > 9999 ? 'text-2xl' : 'text-3xl'
+            }`}>
+              {(points || 0).toLocaleString('pt-PT')}
             </span>
             <span className="text-[10px] text-muted-foreground font-body">pontos</span>
           </div>

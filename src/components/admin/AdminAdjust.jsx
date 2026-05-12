@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { SlidersHorizontal, Plus, Minus } from "lucide-react";
+import { SlidersHorizontal, Plus, Minus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminAdjust() {
@@ -49,7 +49,7 @@ export default function AdminAdjust() {
       const newTotal = Math.max(0, (cls.total_points || 0) + actualPoints);
       const newMonthly = Math.max(0, (cls.monthly_points || 0) + actualPoints);
 
-      await supabase
+      const { error: updErr } = await supabase
         .from('Classroom')
         .update({
           total_points: newTotal,
@@ -57,15 +57,37 @@ export default function AdminAdjust() {
         })
         .eq('id', cls.id);
 
+      if (updErr) {
+        window.alert("Erro ao atualizar pontos na BD: " + updErr.message);
+        throw updErr;
+      }
+
       if (actionType) {
-        await supabase.from('EcoAction').insert([{
+        const { error: actErr } = await supabase.from('EcoAction').insert([{
           classroom_id: cls.id,
           classroom_name: cls.name,
           action_type: actionType,
           points: Math.abs(actualPoints),
           status: "aprovada",
-          registered_by: "professor",
-          notes: reason || `Ajuste manual: ${adjustType === "add" ? "+" : "-"}${pts} pts`,
+          registered_by: "professor"
+        }]);
+
+        if (actErr) {
+          window.alert("Erro ao registar na tabela EcoAction: " + actErr.message);
+        }
+        
+        // Publicar no feed para que a turma saiba
+        await supabase.from('FeedPost').insert([{
+          classroom_id: cls.id,
+          classroom_name: cls.name,
+          action_type: "ajuste_admin",
+          message: reason || `O Professor/Admin ${adjustType === "add" ? "adicionou" : "removeu"} ${pts} pontos à turma.`,
+          points_earned: actualPoints,
+          likes: 0,
+          liked_by: [],
+          reposts: 0,
+          reposted_by: [],
+          is_story: false,
         }]);
       }
     },
@@ -73,10 +95,33 @@ export default function AdminAdjust() {
       queryClient.invalidateQueries({ queryKey: ["admin-classrooms"] });
       queryClient.invalidateQueries({ queryKey: ["actions"] });
       queryClient.invalidateQueries({ queryKey: ["ranking"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
       setPoints("");
       setReason("");
       setActionType("");
       toast.success("Pontos ajustados com sucesso!");
+    },
+    onError: (error) => {
+      toast.error("Erro ao ajustar pontos!");
+      console.error(error);
+    }
+  });
+
+  const resetLimitsMutation = useMutation({
+    mutationFn: async (classId) => {
+      // Set recent actions to 'admin_reset' so they don't count towards the 'turma' limit
+      const since = new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString();
+      const { error } = await supabase
+        .from('EcoAction')
+        .update({ registered_by: "admin_reset" })
+        .eq('classroom_id', classId)
+        .eq('registered_by', 'turma')
+        .gte('created_date', since);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["actions"] });
+      toast.success("Limites repostos! A turma já pode jogar novamente.");
     },
   });
 
@@ -231,6 +276,37 @@ export default function AdminAdjust() {
                 </Select>
               </div>
             ))}
+        </div>
+      </Card>
+
+      {/* Reset Limits */}
+      <Card className="p-5 border-yellow-500/30 bg-yellow-500/5">
+        <div className="flex items-center gap-2 mb-3">
+          <RefreshCw className="h-5 w-5 text-yellow-600" />
+          <h3 className="font-heading font-semibold text-yellow-700">Redefinir Limites (Bypass 1 Hora)</h3>
+        </div>
+        <p className="text-xs text-muted-foreground font-body mb-4">
+          Isto permite que a turma registe ações novamente sem ter de esperar 1 hora (limpa o bloqueio sem apagar os pontos ganhos).
+        </p>
+        <div className="flex gap-2">
+          <Select onValueChange={(classId) => {
+            const cls = classrooms.find(c => c.id === classId);
+            if (!cls) return;
+            if (window.confirm(`Tens a certeza que queres desbloquear a turma ${cls.name}?`)) {
+              resetLimitsMutation.mutate(cls.id);
+            }
+          }}>
+            <SelectTrigger className="w-full text-sm">
+              <SelectValue placeholder="Seleciona a turma para desbloquear" />
+            </SelectTrigger>
+            <SelectContent>
+              {classrooms.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  Desbloquear Turma {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </Card>
     </div>
