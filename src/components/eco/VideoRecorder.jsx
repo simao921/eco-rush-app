@@ -48,6 +48,7 @@ export default function VideoRecorder({ onVideoAnalyzed, onVideoRejected, onCanc
   const [phase, setPhase] = useState("idle");
   const [loadingText, setLoadingText] = useState("");
   const [countdown, setCountdown] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
 
   useEffect(() => {
@@ -243,8 +244,17 @@ CRÍTICO ANTIFRAUDE: Se detetares que este vídeo está a ser filmado a partir d
             </div>
             <p className="text-sm text-muted-foreground font-body leading-relaxed">{analysisResult?.reason}</p>
           </div>
-          <Button onClick={() => onVideoAnalyzed(analysisResult)} size="lg" className="w-full h-16 text-lg font-heading rounded-2xl shadow-xl shadow-primary/20">
-            Submeter Agora
+          <Button 
+            onClick={() => {
+              if (isSubmitting) return;
+              setIsSubmitting(true);
+              onVideoAnalyzed(analysisResult);
+            }} 
+            size="lg" 
+            disabled={isSubmitting}
+            className="w-full h-16 text-lg font-heading rounded-2xl shadow-xl shadow-primary/20"
+          >
+            {isSubmitting ? "A processar..." : "Submeter Agora"}
           </Button>
         </div>
       )}
