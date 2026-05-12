@@ -21,6 +21,7 @@ export function ClassroomProvider({ children }) {
     };
     localStorage.setItem(PERSISTENT_KEY, JSON.stringify(payload));
     sessionStorage.setItem("eco_classroom", JSON.stringify(classroomData));
+    setClassroom(classroomData); // <-- atualiza o estado React
   };
 
   const exitClassroom = () => {
