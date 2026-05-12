@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/api/base44Client";
+import { supabase } from "@/lib/supabaseClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useClassroom } from "@/lib/classroomContext.jsx";
 import { ACTION_TYPES, LEVEL_RULES } from "@/lib/ecoConstants";

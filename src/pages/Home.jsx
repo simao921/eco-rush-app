@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/api/base44Client";
+import { supabase } from "@/lib/supabaseClient";
 import { Leaf, ArrowRight, Trophy, Zap, Recycle, Sparkles, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

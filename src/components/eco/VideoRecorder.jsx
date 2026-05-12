@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Video, StopCircle, RotateCcw, CheckCircle, Loader2 } from "lucide-react";
-import { supabase } from "@/api/base44Client";
+import { supabase } from "@/lib/supabaseClient";
 import { analyzeWithAI } from "@/lib/analyzeClient";
 
 const RECORDING_SECONDS = 10;

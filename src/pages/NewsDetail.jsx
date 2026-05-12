@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { supabase } from "@/api/base44Client";
+import { supabase } from "@/lib/supabaseClient";
 import { useQuery } from "@tanstack/react-query";
 import EcoHeader from "@/components/eco/EcoHeader";
 import { Button } from "@/components/ui/button";

@@ -1,5 +1,5 @@
 import React from "react";
-import { supabase } from "@/api/base44Client";
+import { supabase } from "@/lib/supabaseClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import EcoHeader from "@/components/eco/EcoHeader";
 import RankingCard from "@/components/eco/RankingCard";

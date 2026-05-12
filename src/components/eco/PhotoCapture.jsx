@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, RotateCcw, CheckCircle, Loader2, X } from "lucide-react";
-import { supabase } from "@/api/base44Client";
+import { supabase } from "@/lib/supabaseClient";
 import { analyzeWithAI } from "@/lib/analyzeClient";
 
 const PHOTO_WIDTH = 480;
