@@ -35,11 +35,7 @@ export async function analyzeWithAI(payload, retries = 3) {
     }
   }
 
-  // FALHA DE SEGURANÇA (Failsafe): "nunca pode falhar"
-  // Se o modelo estiver sobrecarregado ou falhar, aprovamos a ação automaticamente.
-  console.warn("AI Analyzer failed after retries. Failsafe triggered.", lastError);
-  return {
-    valid: true,
-    reason: "A vossa ação foi aprovada automaticamente! O nosso detetive ecológico (IA) está a descansar neste momento, mas confiamos no vosso bom trabalho! Continuem assim."
-  };
+  // Se falhou todas as tentativas, lança um erro amigável para a turma
+  console.error("AI Analyzer failed after retries:", lastError);
+  throw new Error("A nossa IA está com muito tráfego neste momento. Por favor, aguardem uns minutos e tentem de novo!");
 }
