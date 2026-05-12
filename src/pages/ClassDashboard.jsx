@@ -152,12 +152,28 @@ export default function ClassDashboard() {
 
       if (actionErr) throw actionErr;
 
-      // Atomically increment points via Supabase RPC (no race condition)
+      // Tentar RPC atómica; se a função não existir no Supabase, fazer UPDATE direto
       const { error: rpcErr } = await supabase.rpc('increment_classroom_points', {
         p_classroom_id: classroom.id,
         p_points: actionDef.points,
       });
-      if (rpcErr) throw rpcErr;
+
+      if (rpcErr) {
+        // Fallback: buscar pontos atuais e fazer UPDATE direto
+        console.warn("RPC não disponível, a usar fallback UPDATE:", rpcErr.message);
+        const { data: live } = await supabase
+          .from('Classroom')
+          .select('total_points, monthly_points')
+          .eq('id', classroom.id)
+          .single();
+        await supabase
+          .from('Classroom')
+          .update({
+            total_points:   (live?.total_points   ?? 0) + actionDef.points,
+            monthly_points: (live?.monthly_points ?? 0) + actionDef.points,
+          })
+          .eq('id', classroom.id);
+      }
 
       const streakDay = computeApprovedStreak(actions, [newAction.created_date || new Date().toISOString()]);
 
