@@ -66,6 +66,10 @@ export default function AdminClassrooms() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
+      // Remover todos os rastros manualmente caso a BD não tenha ON DELETE CASCADE
+      await supabase.from('EcoAction').delete().eq('classroom_id', id);
+      await supabase.from('FeedPost').delete().eq('classroom_id', id);
+
       const { error } = await supabase
         .from('Classroom')
         .delete()
@@ -74,7 +78,10 @@ export default function AdminClassrooms() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-classrooms"] });
-      toast.success("Turma removida.");
+      queryClient.invalidateQueries({ queryKey: ["actions"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+      queryClient.invalidateQueries({ queryKey: ["ranking"] });
+      toast.success("Turma e todos os seus rastros foram eliminados!");
     },
   });
 
