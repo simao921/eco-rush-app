@@ -78,13 +78,9 @@ function StoryViewer({ post, classroom, onClose, onLike, onRepost }) {
 
       {/* Content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6" onClick={(e) => e.stopPropagation()}>
-        {post.photo_url ? (
-          <img src={post.photo_url} alt="" className="max-h-[55vh] w-full object-contain rounded-2xl" />
-        ) : (
-          <div className={`h-32 w-32 rounded-3xl ${ICON_BG[iconColor] || "bg-primary/10"} flex items-center justify-center`}>
-            <Icon className={`h-16 w-16 ${iconColor}`} />
-          </div>
-        )}
+        <div className={`h-32 w-32 rounded-3xl ${ICON_BG[iconColor] || "bg-primary/10"} flex items-center justify-center`}>
+          <Icon className={`h-16 w-16 ${iconColor}`} />
+        </div>
         <div className="text-center">
           <p className="text-white font-body text-lg leading-relaxed">{post.message}</p>
           {post.points_earned > 0 && (
@@ -305,12 +301,7 @@ export default function StoriesFeed({ classroom }) {
                   </div>
                 )}
 
-                {/* Photo */}
-                {post.photo_url && (
-                  <div className="w-full aspect-video bg-muted overflow-hidden">
-                    <img src={post.photo_url} alt="Ação eco" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = "none"; }} />
-                  </div>
-                )}
+                {/* Ocultado por privacidade: photos não são apresentadas */}
 
                 <div className="p-4">
                   {/* Header */}

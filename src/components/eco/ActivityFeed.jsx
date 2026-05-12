@@ -104,17 +104,7 @@ export default function ActivityFeed({ classroom }) {
                   : "bg-card/70 border-border/50"
               }`}
             >
-              {/* Photo */}
-              {post.photo_url && (
-                <div className="w-full aspect-video bg-muted overflow-hidden">
-                  <img
-                    src={post.photo_url}
-                    alt="Ação eco"
-                    className="w-full h-full object-cover"
-                    onError={(e) => { e.target.style.display = "none"; }}
-                  />
-                </div>
-              )}
+              {/* Ocultado por privacidade: photos não são apresentadas */}
 
               <div className="p-4">
                 {/* Header */}
