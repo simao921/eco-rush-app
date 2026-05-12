@@ -152,30 +152,12 @@ export default function ClassDashboard() {
 
       if (actionErr) throw actionErr;
 
-      // Fetch live current points to avoid stale-cache race conditions
-      const { data: liveClassroom, error: liveErr } = await supabase
-        .from('Classroom')
-        .select('total_points, monthly_points')
-        .eq('id', classroom.id)
-        .single();
-      if (liveErr) throw liveErr;
-
-      const nextTotalPoints = (liveClassroom.total_points ?? 0) + actionDef.points;
-      const nextMonthlyPoints = (liveClassroom.monthly_points ?? 0) + actionDef.points;
-
-      const { data: updatedClassroom, error: classroomErr } = await supabase
-        .from('Classroom')
-        .update({
-          total_points: nextTotalPoints,
-          monthly_points: nextMonthlyPoints,
-        })
-        .eq('id', classroom.id)
-        .select();
-
-      if (classroomErr) throw classroomErr;
-      if (!updatedClassroom || updatedClassroom.length === 0) {
-        throw new Error("Não foi possível atualizar os pontos. Desativa o RLS na tabela Classroom no Supabase.");
-      }
+      // Atomically increment points via Supabase RPC (no race condition)
+      const { error: rpcErr } = await supabase.rpc('increment_classroom_points', {
+        p_classroom_id: classroom.id,
+        p_points: actionDef.points,
+      });
+      if (rpcErr) throw rpcErr;
 
       const streakDay = computeApprovedStreak(actions, [newAction.created_date || new Date().toISOString()]);
 
