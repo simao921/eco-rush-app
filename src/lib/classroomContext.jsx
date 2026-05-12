@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState } from "react";
 
+const PERSISTENT_KEY = "eco_classroom_persistent";
+const DAYS_30 = 30 * 24 * 60 * 60 * 1000;
+
 const ClassroomContext = createContext(null);
 
 export function ClassroomProvider({ children }) {
@@ -10,21 +13,47 @@ export function ClassroomProvider({ children }) {
     sessionStorage.setItem("eco_classroom", JSON.stringify(classroomData));
   };
 
+  // Guardar sessão durante 30 dias no localStorage
+  const saveSessionLong = (classroomData) => {
+    const payload = {
+      data: classroomData,
+      expiresAt: Date.now() + DAYS_30,
+    };
+    localStorage.setItem(PERSISTENT_KEY, JSON.stringify(payload));
+    sessionStorage.setItem("eco_classroom", JSON.stringify(classroomData));
+  };
+
   const exitClassroom = () => {
     setClassroom(null);
     sessionStorage.removeItem("eco_classroom");
+    localStorage.removeItem(PERSISTENT_KEY);
   };
 
-  // Restore from session on mount
+  // Restaurar sessão no arranque: primeiro sessionStorage, depois localStorage (30 dias)
   React.useEffect(() => {
-    const saved = sessionStorage.getItem("eco_classroom");
-    if (saved) {
-      setClassroom(JSON.parse(saved));
+    const session = sessionStorage.getItem("eco_classroom");
+    if (session) {
+      setClassroom(JSON.parse(session));
+      return;
+    }
+    const persistent = localStorage.getItem(PERSISTENT_KEY);
+    if (persistent) {
+      try {
+        const { data, expiresAt } = JSON.parse(persistent);
+        if (Date.now() < expiresAt) {
+          setClassroom(data);
+          sessionStorage.setItem("eco_classroom", JSON.stringify(data));
+        } else {
+          localStorage.removeItem(PERSISTENT_KEY);
+        }
+      } catch {
+        localStorage.removeItem(PERSISTENT_KEY);
+      }
     }
   }, []);
 
   return (
-    <ClassroomContext.Provider value={{ classroom, enterClassroom, exitClassroom }}>
+    <ClassroomContext.Provider value={{ classroom, enterClassroom, exitClassroom, saveSessionLong }}>
       {children}
     </ClassroomContext.Provider>
   );

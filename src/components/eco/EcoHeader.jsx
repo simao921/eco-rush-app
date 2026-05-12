@@ -1,16 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Leaf, Trophy, LogOut } from "lucide-react";
+import { Leaf, Trophy, LogOut, BookmarkCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useClassroom } from "@/lib/classroomContext.jsx";
+import { toast } from "sonner";
 
 export default function EcoHeader() {
-  const { classroom, exitClassroom } = useClassroom();
+  const { classroom, exitClassroom, saveSessionLong } = useClassroom();
   const navigate = useNavigate();
+  const [saved, setSaved] = useState(false);
 
   const handleExit = () => {
     exitClassroom();
     navigate("/");
+  };
+
+  const handleSaveSession = () => {
+    if (classroom) {
+      saveSessionLong(classroom);
+      setSaved(true);
+      toast.success("✅ Sessão guardada por 30 dias! Podes fechar o browser.");
+      setTimeout(() => setSaved(false), 4000);
+    }
   };
 
   return (
@@ -41,6 +52,18 @@ export default function EcoHeader() {
                   <span className="hidden sm:inline font-medium">{classroom.name}</span>
                 </Button>
               </Link>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSaveSession}
+                title="Guardar sessão por 30 dias"
+                className={`transition-colors ${saved ? "text-green-500" : "text-muted-foreground hover:text-primary"}`}
+              >
+                <BookmarkCheck className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1 text-xs">{saved ? "Guardado!" : "30 dias"}</span>
+              </Button>
+
               <Button
                 variant="ghost"
                 size="sm"
