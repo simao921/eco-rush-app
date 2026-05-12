@@ -170,6 +170,8 @@ export default function ClassDashboard() {
         
         if (liveErr) throw new Error("Erro ao buscar pontos atuais: " + liveErr.message);
 
+        toast.info(`Pontos atuais na BD: ${live.total_points || 0}. A somar: ${actionDef.points}`);
+
         const { data: updated, error: updErr } = await supabase
           .from('Classroom')
           .update({
@@ -183,6 +185,7 @@ export default function ClassDashboard() {
         if (!updated || updated.length === 0) {
           throw new Error("Erro de permissão: A tabela Classroom está protegida por RLS. Vai ao Supabase e desativa o RLS ou cria uma política de UPDATE.");
         }
+        console.log("Pontos atualizados com sucesso para:", updated[0].total_points);
       }
 
       const streakDay = computeApprovedStreak(actions, [newAction.created_date || new Date().toISOString()]);
@@ -214,14 +217,16 @@ export default function ClassDashboard() {
       }]);
 
       if (feedErr) console.warn("Erro ao publicar no feed:", feedErr);
-      return newAction;
+      return { newAction, pointsAdded: actionDef.points };
     },
-    onSuccess: (newAction) => {
-      queryClient.invalidateQueries({ queryKey: ["actions", classroom.id] });
-      queryClient.invalidateQueries({ queryKey: ["classroom", classroom.id] });
+    onSuccess: (result) => {
+      // Forçar refetch imediato de tudo
+      queryClient.refetchQueries({ queryKey: ["classroom", classroom.id] });
+      queryClient.refetchQueries({ queryKey: ["actions", classroom.id] });
       queryClient.invalidateQueries({ queryKey: ["feed"] });
       queryClient.invalidateQueries({ queryKey: ["ranking"] });
-      toast.success(`🚀 Ação registada com sucesso! +${newAction?.points || 0} pontos!`);
+      
+      toast.success(`🚀 Ação registada! +${result.pointsAdded} pontos submetidos!`);
     },
     onError: (error) => {
       console.error("Erro ao registar a ação:", error);
