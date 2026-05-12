@@ -142,13 +142,7 @@ export default function ClassDashboard() {
         action_type: actionKey,
         points: actionDef.points,
         status: "aprovada",
-        registered_by: "turma",
-        ...(aiResult && { 
-          ai_analysis: aiResult.reason, 
-          ai_valid: true,
-          photo_url: aiResult.photo_url,
-          video_url: aiResult.video_url
-        }),
+        registered_by: "turma"
       }]).select().single();
 
       if (actionErr) {
