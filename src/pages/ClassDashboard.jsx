@@ -151,42 +151,41 @@ export default function ClassDashboard() {
         }),
       }]).select().single();
 
-      if (actionErr) throw actionErr;
+      if (actionErr) {
+        window.alert("Erro ao criar ação: " + actionErr.message);
+        throw actionErr;
+      }
 
-      // Tentar RPC atómica; se a função não existir no Supabase, fazer UPDATE direto
-      const { error: rpcErr } = await supabase.rpc('increment_classroom_points', {
-        p_classroom_id: classroom.id,
-        p_points: actionDef.points,
-      });
+      // Tentar atualização direta simplificada
+      const { data: live, error: liveErr } = await supabase
+        .from('Classroom')
+        .select('total_points, monthly_points')
+        .eq('id', classroom.id)
+        .single();
+      
+      if (liveErr) {
+        window.alert("Erro ao ler pontos da BD: " + liveErr.message);
+        throw liveErr;
+      }
 
-      if (rpcErr) {
-        // Fallback: buscar pontos atuais e fazer UPDATE direto
-        console.warn("RPC não disponível, a usar fallback UPDATE:", rpcErr.message);
-        
-        const { data: live, error: liveErr } = await supabase
-          .from('Classroom')
-          .select('total_points, monthly_points')
-          .eq('id', classroom.id)
-          .single();
-        
-        if (liveErr) throw new Error("Erro ao buscar pontos atuais: " + liveErr.message);
+      const { data: updated, error: updErr } = await supabase
+        .from('Classroom')
+        .update({
+          total_points:   (live.total_points || 0) + actionDef.points,
+          monthly_points: (live.monthly_points || 0) + actionDef.points,
+          updated_date:   new Date().toISOString()
+        })
+        .eq('id', classroom.id)
+        .select();
 
-        toast.info(`Pontos atuais na BD: ${live.total_points || 0}. A somar: ${actionDef.points}`);
+      if (updErr) {
+        window.alert("Erro ao gravar pontos: " + updErr.message);
+        throw updErr;
+      }
 
-        const { data: updated, error: updErr } = await supabase
-          .from('Classroom')
-          .update({
-            total_points:   (live.total_points   ?? 0) + actionDef.points,
-            monthly_points: (live.monthly_points ?? 0) + actionDef.points,
-          })
-          .eq('id', classroom.id)
-          .select();
-
-        if (updErr) throw new Error("Erro ao atualizar pontos: " + updErr.message);
-        if (!updated || updated.length === 0) {
-          throw new Error("Erro de permissão: A tabela Classroom está protegida por RLS. Vai ao Supabase e desativa o RLS ou cria uma política de UPDATE.");
-        }
-        console.log("Pontos atualizados com sucesso para:", updated[0].total_points);
+      if (!updated || updated.length === 0) {
+        window.alert("Erro: A base de dados não permitiu gravar. Verificaste o RLS?");
+        throw new Error("Zero rows updated");
       }
 
       const streakDay = computeApprovedStreak(actions, [newAction.created_date || new Date().toISOString()]);
