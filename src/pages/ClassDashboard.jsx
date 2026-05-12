@@ -203,6 +203,10 @@ export default function ClassDashboard() {
       queryClient.invalidateQueries({ queryKey: ["ranking"] });
       toast.success(`🚀 Ação registada com sucesso! +${newAction?.points || 0} pontos!`);
     },
+    onError: (error) => {
+      console.error("Erro ao registar a ação:", error);
+      toast.error(`Erro ao submeter: ${error.message || "Tente novamente mais tarde"}`);
+    },
   });
 
   if (!classroom) return null;
