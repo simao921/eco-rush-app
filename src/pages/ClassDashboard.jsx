@@ -22,13 +22,12 @@ import { motion } from "framer-motion";
 
 // How many times each action can be registered per window (by turma)
 const ACTION_LIMITS = {
-  apanhar_lixo:         { max: 3, windowHours: 4 },
-  reciclagem_correta:   { max: 2, windowHours: 24 },
-  apagar_luzes:         { max: 2, windowHours: 24 },
-  sala_limpa:           { max: 1, windowHours: 24 },
-  reducao_desperdicio:  { max: 1, windowHours: 24 },
-  // high-level: professor only (level "high") — still shown as "aguarda prof"
-  participacao_acoes:   { max: 1, windowHours: 168 },
+  apanhar_lixo:            { max: 3, windowHours: 4 },
+  reciclagem_correta:      { max: 2, windowHours: 24 },
+  apagar_luzes:            { max: 2, windowHours: 24 },
+  sala_limpa:              { max: 1, windowHours: 24 },
+  reducao_desperdicio:     { max: 1, windowHours: 24 },
+  participacao_acoes:      { max: 1, windowHours: 168 },
   iniciativas_espontaneas: { max: 1, windowHours: 168 },
 };
 
@@ -152,8 +151,17 @@ export default function ClassDashboard() {
       }]).select().single();
 
       if (actionErr) throw actionErr;
-      const nextTotalPoints = (freshClassroom?.total_points ?? classroom.total_points ?? 0) + actionDef.points;
-      const nextMonthlyPoints = (freshClassroom?.monthly_points ?? classroom.monthly_points ?? 0) + actionDef.points;
+
+      // Fetch live current points to avoid stale-cache race conditions
+      const { data: liveClassroom, error: liveErr } = await supabase
+        .from('Classroom')
+        .select('total_points, monthly_points')
+        .eq('id', classroom.id)
+        .single();
+      if (liveErr) throw liveErr;
+
+      const nextTotalPoints = (liveClassroom.total_points ?? 0) + actionDef.points;
+      const nextMonthlyPoints = (liveClassroom.monthly_points ?? 0) + actionDef.points;
 
       const { data: updatedClassroom, error: classroomErr } = await supabase
         .from('Classroom')
@@ -166,7 +174,7 @@ export default function ClassDashboard() {
 
       if (classroomErr) throw classroomErr;
       if (!updatedClassroom || updatedClassroom.length === 0) {
-        throw new Error("Não foi possível atualizar os pontos da turma. Verifica se tens o RLS desativado ou as políticas de UPDATE corretas na tabela Classroom.");
+        throw new Error("Não foi possível atualizar os pontos. Desativa o RLS na tabela Classroom no Supabase.");
       }
 
       const streakDay = computeApprovedStreak(actions, [newAction.created_date || new Date().toISOString()]);
