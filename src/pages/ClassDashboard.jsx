@@ -260,6 +260,17 @@ export default function ClassDashboard() {
       <EcoHeader />
       <main className="relative z-10 max-w-2xl mx-auto px-4 py-8 space-y-6">
 
+        {/* Botão de Teste Temporário */}
+        <div className="flex justify-center mb-4">
+          <Button 
+            onClick={() => registerMutation.mutate({ actionKey: 'apagar_luzes', aiResult: { valid: true, reason: 'Teste manual', photo_url: null, video_url: null } })}
+            variant="outline"
+            className="bg-yellow-500/20 border-yellow-500 text-yellow-700 font-bold"
+          >
+            ⚠️ TESTE +1 PT (Clica aqui para testar a BD)
+          </Button>
+        </div>
+
         {/* Hero banner */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
