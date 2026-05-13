@@ -245,42 +245,44 @@ export default function Home() {
             <h2 className="font-heading font-bold text-xl">Perguntas Frequentes</h2>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-5">
             {[
               {
-                q: "Quem pode participar?",
-                a: "Todos os alunos das turmas da escola EB 2,3 El Rei D. Manuel I que tenham o código de acesso da sua turma."
+                q: "Quem pode participar nesta missão?",
+                a: "Este desafio é exclusivo para todos os alunos da EB 2,3 El Rei D. Manuel I. Se queres mostrar que a tua turma é a mais consciente e ativa, só precisas do teu código de acesso e de vontade de mudar o mundo!"
               },
               {
-                q: "O que ganho com isto?",
-                a: "Além de ajudares o planeta, ganhas pontos para a tua turma, sobes no ranking e ganhas reconhecimento como a turma mais sustentável da escola!"
+                q: "O que ganho em ser um Eco-Guerreiro?",
+                a: "Muito mais do que pontos! Vais lutar pelo prestigiado título de 'Turma Mais Sustentável', ganhar o reconhecimento de toda a escola e, o mais importante: serás o motor da mudança para um planeta mais verde. Além disso, as turmas no topo do ranking habilitam-se a prémios e surpresas exclusivas!"
               },
               {
-                q: "Como são validadas as ações?",
-                a: "Usamos Inteligência Artificial para analisar os teus vídeos em tempo real e garantir que a ação foi realizada corretamente de forma automática."
+                q: "A Inteligência Artificial valida mesmo o que eu faço?",
+                a: "Sim! O nosso 'árbitro digital' analisa os teus vídeos em segundos para garantir que cada gesto é real. É um sistema de alta tecnologia que garante que a competição é 100% justa e transparente para todos os participantes."
               },
               {
-                q: "Quantas vezes posso participar?",
-                a: "Podes registar várias ações, mas existem limites (ex: 1 hora) entre ações do mesmo tipo para que a competição seja equilibrada para todos."
+                q: "Como posso levar a minha turma à vitória?",
+                a: "O segredo é o trabalho de equipa! Quanto mais colegas participarem e mantiverem a 'streak' (dias seguidos de ações), mais bónus a vossa turma recebe. A união faz a força... e os pontos!"
               },
               {
-                q: "Perdi o meu código, o que faço?",
-                a: "Fala com o teu Diretor de Turma ou com o professor responsável pelo projeto para recuperares o código de acesso da tua turma."
+                q: "É seguro participar?",
+                a: "Totalmente. O Eco Rush foca-se apenas na validação das ações ecológicas. Não partilhamos as tuas imagens com ninguém e o objetivo é puramente educativo e pedagógico, promovendo bons hábitos na nossa escola."
               }
             ].map((item, idx) => (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 + idx * 0.1 }}
-                className="group rounded-2xl border border-border/50 bg-card/40 p-5 hover:border-primary/30 hover:bg-card/60 transition-all duration-300 shadow-sm"
+                className="group rounded-3xl border border-border/40 bg-gradient-to-br from-card/80 to-card/40 p-6 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 shadow-sm"
               >
-                <h3 className="font-heading font-bold text-sm text-foreground flex items-start gap-3">
-                  <span className="text-primary mt-0.5">Q.</span>
+                <h3 className="font-heading font-extrabold text-base text-foreground flex items-center gap-4">
+                  <div className="h-8 w-8 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0 text-xs font-black">
+                    {idx + 1}
+                  </div>
                   {item.q}
                 </h3>
-                <div className="mt-2 pl-7 border-l-2 border-primary/10 group-hover:border-primary/30 transition-colors">
-                  <p className="font-body text-xs text-muted-foreground leading-relaxed">
+                <div className="mt-4 pl-12">
+                  <p className="font-body text-sm text-muted-foreground leading-relaxed">
                     {item.a}
                   </p>
                 </div>
