@@ -230,6 +230,64 @@ export default function Home() {
             </div>
           </motion.div>
         )}
+
+        {/* FAQ Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.65 }}
+          className="max-w-2xl mx-auto mt-16 mb-10 w-full"
+        >
+          <div className="flex items-center gap-2 mb-6">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <span className="text-lg">❓</span>
+            </div>
+            <h2 className="font-heading font-bold text-xl">Perguntas Frequentes</h2>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                q: "Quem pode participar?",
+                a: "Todos os alunos das turmas da escola EB 2,3 El Rei D. Manuel I que tenham o código de acesso da sua turma."
+              },
+              {
+                q: "O que ganho com isto?",
+                a: "Além de ajudares o planeta, ganhas pontos para a tua turma, sobes no ranking e ganhas reconhecimento como a turma mais sustentável da escola!"
+              },
+              {
+                q: "Como são validadas as ações?",
+                a: "Usamos Inteligência Artificial para analisar os teus vídeos em tempo real e garantir que a ação foi realizada corretamente de forma automática."
+              },
+              {
+                q: "Quantas vezes posso participar?",
+                a: "Podes registar várias ações, mas existem limites (ex: 1 hora) entre ações do mesmo tipo para que a competição seja equilibrada para todos."
+              },
+              {
+                q: "Perdi o meu código, o que faço?",
+                a: "Fala com o teu Diretor de Turma ou com o professor responsável pelo projeto para recuperares o código de acesso da tua turma."
+              }
+            ].map((item, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7 + idx * 0.1 }}
+                className="group rounded-2xl border border-border/50 bg-card/40 p-5 hover:border-primary/30 hover:bg-card/60 transition-all duration-300 shadow-sm"
+              >
+                <h3 className="font-heading font-bold text-sm text-foreground flex items-start gap-3">
+                  <span className="text-primary mt-0.5">Q.</span>
+                  {item.q}
+                </h3>
+                <div className="mt-2 pl-7 border-l-2 border-primary/10 group-hover:border-primary/30 transition-colors">
+                  <p className="font-body text-xs text-muted-foreground leading-relaxed">
+                    {item.a}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </main>
 
       <footer className="relative z-10 text-center py-6 border-t border-border/40">
