@@ -5,11 +5,17 @@ export async function analyzeWithAI(payload, retries = 3) {
 
   for (let i = 0; i < retries; i++) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
+
       const response = await fetch(ANALYZE_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       const contentType = response.headers.get("content-type") || "";
 
