@@ -45,11 +45,16 @@ export default function EcoHeader() {
           {classroom && (
             <>
               <Link to="/turma">
-                <Button variant="ghost" size="sm" className="gap-1.5 font-body">
-                  <div className="h-5 w-5 rounded-md bg-primary/15 flex items-center justify-center">
-                    <Leaf className="h-3 w-3 text-primary" />
+                <Button variant="ghost" size="sm" className="gap-1.5 font-body flex flex-col items-start leading-none h-11">
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-5 w-5 rounded-md bg-primary/15 flex items-center justify-center">
+                      <Leaf className="h-3 w-3 text-primary" />
+                    </div>
+                    <span className="font-bold text-xs sm:text-sm">{classroom.name}</span>
                   </div>
-                  <span className="hidden sm:inline font-medium">{classroom.name}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-black pl-6">
+                    {classroom.cycle === '1_ciclo' ? '1º Ciclo' : classroom.cycle === '3_ciclo' ? '3º Ciclo' : '2º Ciclo'}
+                  </span>
                 </Button>
               </Link>
 

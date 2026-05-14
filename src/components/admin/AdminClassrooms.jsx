@@ -22,6 +22,7 @@ import {
 
 export default function AdminClassrooms() {
   const [newName, setNewName] = useState("");
+  const [newCycle, setNewCycle] = useState("2_ciclo");
   const queryClient = useQueryClient();
 
   const { data: classrooms = [], isLoading } = useQuery({
@@ -46,6 +47,7 @@ export default function AdminClassrooms() {
           access_code: code,
           total_points: 0,
           monthly_points: 0,
+          cycle: newCycle,
         }])
         .select()
         .single();
@@ -100,13 +102,22 @@ export default function AdminClassrooms() {
     <div className="space-y-4">
       {/* Create form */}
       <Card className="p-4">
-        <form onSubmit={handleCreate} className="flex gap-2">
+        <form onSubmit={handleCreate} className="flex flex-col sm:flex-row gap-3">
           <Input
             placeholder="Nome da turma (ex: 7A)"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            className="font-body"
+            className="font-body flex-1"
           />
+          <select 
+            value={newCycle} 
+            onChange={(e) => setNewCycle(e.target.value)}
+            className="h-10 px-3 rounded-md border border-input bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/20"
+          >
+            <option value="1_ciclo">1º Ciclo</option>
+            <option value="2_ciclo">2º Ciclo</option>
+            <option value="3_ciclo">3º Ciclo</option>
+          </select>
           <Button type="submit" disabled={createMutation.isPending || !newName.trim()} className="gap-2 shrink-0">
             <Plus className="h-4 w-4" /> Criar
           </Button>
@@ -137,9 +148,14 @@ export default function AdminClassrooms() {
                   </Button>
                 </div>
               </div>
-              <div className="text-right mr-2">
-                <p className="font-heading font-bold text-primary">{c.total_points || 0}</p>
-                <p className="text-xs text-muted-foreground">pontos</p>
+              <div className="text-right mr-2 flex flex-col items-end">
+                <Badge variant="secondary" className="mb-1 text-[10px] uppercase tracking-wider">
+                  {c.cycle === '1_ciclo' ? '1º Ciclo' : c.cycle === '3_ciclo' ? '3º Ciclo' : '2º Ciclo'}
+                </Badge>
+                <div className="flex items-center gap-1">
+                  <p className="font-heading font-bold text-primary">{c.total_points || 0}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-black">pts</p>
+                </div>
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>

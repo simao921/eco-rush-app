@@ -13,54 +13,39 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // Capturar o body manualmente se necessário
   let body = req.body;
-  
-  // Se o body for um stream ou string, vamos garantir que temos um objeto
   if (typeof body === 'string') {
     try { body = JSON.parse(body); } catch(e) { body = {}; }
   } else if (!body) {
-    // Tenta ler o body do stream se estiver vazio (comum em Vercel/Vite)
     const buffers = [];
-    for await (const chunk of req) {
-      buffers.push(chunk);
-    }
+    for await (const chunk of req) { buffers.push(chunk); }
     const data = Buffer.concat(buffers).toString();
     try { body = JSON.parse(data); } catch(e) { body = {}; }
   }
 
-  const { file_urls, images, prompt } = body || {};
+  const { file_urls, images, prompt: userPrompt } = body || {};
   const geminiKey = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
   if (!geminiKey) {
     return res.status(500).json({ error: 'GEMINI_API_KEY não configurada no servidor.' });
   }
 
-  if (!prompt) {
+  if (!userPrompt) {
     return res.status(400).json({ error: 'Prompt não fornecido.' });
   }
 
   try {
     let imageParts = [];
-
     if (images && Array.isArray(images) && images.length > 0) {
       imageParts = images.map(base64 => ({
-        inline_data: {
-          mime_type: "image/jpeg",
-          data: base64
-        }
+        inline_data: { mime_type: "image/jpeg", data: base64 }
       }));
     } else if (file_urls && Array.isArray(file_urls) && file_urls.length > 0) {
       imageParts = await Promise.all(file_urls.map(async (url) => {
         const resp = await fetch(url);
         const buffer = await resp.arrayBuffer();
         const base64 = Buffer.from(buffer).toString('base64');
-        return {
-          inline_data: {
-            mime_type: "image/jpeg",
-            data: base64
-          }
-        };
+        return { inline_data: { mime_type: "image/jpeg", data: base64 } };
       }));
     }
 
@@ -68,19 +53,34 @@ export default async function handler(req, res) {
        return res.status(400).json({ error: 'Nenhuma imagem fornecida para análise.' });
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`, {
+    // Instrução de Sistema para tornar a IA um "Árbitro Digital" de elite
+    const systemInstruction = `
+      És o Árbitro Digital do Eco-Rush na escola EB 2,3 El Rei D. Manuel I. 
+      O teu objetivo é validar ações ecológicas com 100% de rigor.
+      
+      REGRAS CRÍTICAS:
+      1. ANTI-FRAUDE: Rejeita IMEDIATAMENTE se vires um telemóvel a filmar outro ecrã, fotos de ecrãs de computador ou vídeos repetidos.
+      2. VALIDAÇÃO: Só aprova se a ação (luz apagada, lixo no balde, reciclagem) for claramente visível e em tempo real.
+      3. RESPOSTA: Responde APENAS em JSON puro. Nunca adiciones texto fora do JSON.
+      
+      Formato de resposta:
+      {"valid": boolean, "reason": "Explicação curta em Português de Portugal"}
+    `;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiKey}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: prompt + "\nResponde APENAS em JSON no formato: {\"valid\": boolean, \"reason\": \"string\"}" },
+            { text: systemInstruction + "\n\nDesafio Atual: " + userPrompt },
             ...imageParts
           ]
         }],
         generationConfig: {
+          temperature: 0.1, // Mais preciso, menos criativo
+          topP: 0.8,
+          topK: 40,
           response_mime_type: "application/json"
         }
       })
@@ -89,26 +89,23 @@ export default async function handler(req, res) {
     const data = await response.json();
     
     if (data.error) {
-      console.error("Gemini Error:", data.error);
-      return res.status(500).json({ error: data.error.message || 'Erro no Gemini' });
+      console.error("Gemini API Error:", data.error);
+      return res.status(500).json({ error: 'A IA está temporariamente ocupada. Tenta em 10 segundos.' });
     }
 
-    const candidates = data.candidates || [];
-    if (candidates.length > 0 && candidates[0]?.content?.parts?.[0]?.text) {
-      const text = candidates[0].content.parts[0].text;
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (text) {
       try {
-        const result = JSON.parse(text);
+        const result = JSON.parse(text.trim());
         return res.status(200).json(result);
       } catch (e) {
-        console.error("JSON Parse Error:", text);
-        return res.status(500).json({ error: 'A IA deu uma resposta num formato invalido.' });
+        return res.status(500).json({ error: 'Erro ao processar veredito da IA.' });
       }
     } else {
-      console.error("Gemini Empty Response:", JSON.stringify(data));
-      return res.status(500).json({ error: 'A IA nao conseguiu analisar a imagem. Tenta de novo.' });
+      return res.status(500).json({ error: 'A IA não conseguiu observar a ação. Tenta outro ângulo.' });
     }
   } catch (error) {
     console.error("Internal Error:", error);
-    return res.status(500).json({ error: `Erro interno: ${error.message}` });
+    return res.status(500).json({ error: 'Erro na ligação com o árbitro digital.' });
   }
 }

@@ -197,6 +197,7 @@ export default function ClassDashboard() {
         photo_url: aiResult?.photo_url || null,
         streak_day: streakDay,
         is_story: true,
+        cycle: classroom.cycle || '2_ciclo',
       }]);
 
       if (feedErr) console.warn("Erro ao publicar no feed:", feedErr);

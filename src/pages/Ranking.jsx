@@ -4,18 +4,27 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import EcoHeader from "@/components/eco/EcoHeader";
 import RankingCard from "@/components/eco/RankingCard";
 import { Trophy, Leaf } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { useClassroom } from "@/lib/classroomContext.jsx";
 
 export default function Ranking() {
   const { classroom } = useClassroom();
+  const [selectedCycle, setSelectedCycle] = React.useState(classroom?.cycle || "2_ciclo");
+
+  React.useEffect(() => {
+    if (classroom?.cycle) {
+      setSelectedCycle(classroom.cycle);
+    }
+  }, [classroom]);
 
   const { data: classrooms = [], isLoading } = useQuery({
-    queryKey: ["ranking"],
+    queryKey: ["ranking", selectedCycle],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('Classroom')
         .select('*')
+        .eq('cycle', selectedCycle)
         .order('total_points', { ascending: false })
         .limit(50);
       if (error) throw error;
@@ -69,6 +78,31 @@ export default function Ranking() {
           <p className="text-sm text-muted-foreground font-body mt-1">
             Competição saudável entre turmas 🌿
           </p>
+
+          {/* Cycle Tabs */}
+          {!classroom && (
+            <div className="flex items-center justify-center gap-2 mt-6">
+              {['1_ciclo', '2_ciclo', '3_ciclo'].map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setSelectedCycle(c)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                    selectedCycle === c 
+                      ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  {c === '1_ciclo' ? '1º Ciclo' : c === '2_ciclo' ? '2º Ciclo' : '3º Ciclo'}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {classroom && (
+            <Badge variant="secondary" className="mt-4 px-3 py-1 uppercase tracking-widest text-[10px] font-black">
+              {classroom.cycle === '1_ciclo' ? '1º Ciclo' : classroom.cycle === '2_ciclo' ? '2º Ciclo' : '3º Ciclo'}
+            </Badge>
+          )}
         </motion.div>
 
         {/* Top 3 podium */}

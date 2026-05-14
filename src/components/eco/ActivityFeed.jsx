@@ -26,13 +26,19 @@ export default function ActivityFeed({ classroom }) {
   const queryClient = useQueryClient();
 
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["feed"],
+    queryKey: ["feed", classroom?.cycle],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('FeedPost')
         .select('*')
         .order('created_date', { ascending: false })
         .limit(30);
+
+      if (classroom?.cycle) {
+        query = query.eq('cycle', classroom.cycle);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
