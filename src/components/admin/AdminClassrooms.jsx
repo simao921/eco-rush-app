@@ -77,6 +77,13 @@ export default function AdminClassrooms() {
         .delete()
         .eq('id', id);
       if (error) throw error;
+
+      // Log de Auditoria
+      await supabase.from('AuditLog').insert([{
+        action: 'DELETE_CLASSROOM',
+        details: `Eliminação da turma ID: ${id}`,
+        level: 'critical'
+      }]);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-classrooms"] });

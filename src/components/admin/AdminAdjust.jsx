@@ -90,6 +90,13 @@ export default function AdminAdjust() {
           is_story: false,
         }]);
       }
+
+      // Log de Auditoria
+      await supabase.from('AuditLog').insert([{
+        action: 'ADJUST_POINTS',
+        details: `${adjustType === 'add' ? 'Adição' : 'Remoção'} de ${pts} pontos à turma ${cls.name}. Motivo: ${reason || 'Sem motivo especificado'}`,
+        level: 'important'
+      }]);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-classrooms"] });

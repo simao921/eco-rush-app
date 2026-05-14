@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Video, StopCircle, RotateCcw, CheckCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { analyzeWithAI } from "@/lib/analyzeClient";
+import { toast } from "sonner";
 
 const RECORDING_SECONDS = 10;
 const FRAME_COUNT = 22;
@@ -85,9 +86,20 @@ export default function VideoRecorder({ onVideoAnalyzed, onVideoRejected, onCanc
   };
 
   const analyzeFrames = async (frames, videoBlob) => {
+    // RATE LIMITING: Proteção para a cota gratuita da IA
+    const lastSubmission = localStorage.getItem("eco_last_ai_submission");
+    const now = Date.now();
+    if (lastSubmission && (now - parseInt(lastSubmission)) < 30000) {
+      const remaining = Math.ceil((30000 - (now - parseInt(lastSubmission))) / 1000);
+      toast.error(`Aguardem ${remaining} segundos para uma nova validação. Respirem fundo e salvem o planeta! 🌍`);
+      setPhase("idle");
+      return;
+    }
+
     setPhase("analyzing");
     setLoadingText("A preparar dados...");
     try {
+      localStorage.setItem("eco_last_ai_submission", Date.now().toString());
       const actionPrompt = ACTION_PROMPTS[actionKey] || ACTION_PROMPTS["apanhar_lixo"];
 
       setLoadingText("IA a validar acao (aguarda)...");
