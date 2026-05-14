@@ -165,7 +165,9 @@ export default function AdminAdjust() {
               <SelectContent>
                 {classrooms.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
-                    Turma {c.name} — {c.total_points || 0} pts
+                    Turma {c.name} ({c.cycle === '1_ciclo' ? '1º Ciclo' : 
+                                     c.cycle === '3_ciclo' ? '3º Ciclo' : 
+                                     c.cycle === 'funcionarias' ? 'Funcionárias' : '2º Ciclo'}) — {c.total_points || 0} pts
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -23,6 +23,7 @@ import {
 export default function AdminClassrooms() {
   const [newName, setNewName] = useState("");
   const [newCycle, setNewCycle] = useState("2_ciclo");
+  const [filterCycle, setFilterCycle] = useState("all");
   const queryClient = useQueryClient();
 
   const { data: classrooms = [], isLoading } = useQuery({
@@ -132,7 +133,22 @@ export default function AdminClassrooms() {
         </form>
       </Card>
 
-      {/* List */}
+      {/* Filters and List */}
+      <div className="flex items-center justify-between px-1">
+        <h3 className="font-heading font-semibold text-sm">Turmas e Grupos</h3>
+        <select 
+          value={filterCycle} 
+          onChange={(e) => setFilterCycle(e.target.value)}
+          className="text-xs font-body bg-transparent border-none focus:ring-0 text-muted-foreground cursor-pointer"
+        >
+          <option value="all">Todos os ciclos</option>
+          <option value="1_ciclo">1º Ciclo</option>
+          <option value="2_ciclo">2º Ciclo</option>
+          <option value="3_ciclo">3º Ciclo</option>
+          <option value="funcionarias">Funcionárias</option>
+        </select>
+      </div>
+
       {isLoading ? (
         <div className="flex justify-center py-8">
           <div className="w-6 h-6 border-3 border-primary/20 border-t-primary rounded-full animate-spin" />
@@ -143,7 +159,9 @@ export default function AdminClassrooms() {
         </p>
       ) : (
         <div className="space-y-2">
-          {classrooms.map((c) => (
+          {classrooms
+            .filter(c => filterCycle === "all" || c.cycle === filterCycle)
+            .map((c) => (
             <Card key={c.id} className="p-4 flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <p className="font-heading font-semibold">Turma {c.name}</p>
