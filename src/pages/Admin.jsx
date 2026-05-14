@@ -21,7 +21,7 @@ export default function Admin() {
     return sessionStorage.getItem("eco_admin_auth") === "true";
   });
   
-  const MASTER_PASSWORD = "eco-professor-2024"; // Recomenda-se mudar isto ou usar env var
+  const MASTER_PASSWORD = "AEAECO2026"; // Senha personalizada pelo utilizador
 
   const handleLogin = (e) => {
     e.preventDefault();
