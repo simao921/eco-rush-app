@@ -53,7 +53,9 @@ export default function EcoHeader() {
                     <span className="font-bold text-xs sm:text-sm">{classroom.name}</span>
                   </div>
                   <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-black pl-6">
-                    {classroom.cycle === '1_ciclo' ? '1º Ciclo' : classroom.cycle === '3_ciclo' ? '3º Ciclo' : '2º Ciclo'}
+                    {classroom.cycle === '1_ciclo' ? '1º Ciclo' : 
+                     classroom.cycle === '3_ciclo' ? '3º Ciclo' : 
+                     classroom.cycle === 'funcionarias' ? 'Funcionárias' : '2º Ciclo'}
                   </span>
                 </Button>
               </Link>

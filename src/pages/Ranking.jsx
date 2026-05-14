@@ -81,8 +81,8 @@ export default function Ranking() {
 
           {/* Cycle Tabs */}
           {!classroom && (
-            <div className="flex items-center justify-center gap-2 mt-6">
-              {['1_ciclo', '2_ciclo', '3_ciclo'].map((c) => (
+            <div className="flex items-center justify-center gap-2 mt-6 flex-wrap">
+              {['1_ciclo', '2_ciclo', '3_ciclo', 'funcionarias'].map((c) => (
                 <button
                   key={c}
                   onClick={() => setSelectedCycle(c)}
@@ -92,7 +92,9 @@ export default function Ranking() {
                       : "bg-muted text-muted-foreground hover:bg-muted/80"
                   }`}
                 >
-                  {c === '1_ciclo' ? '1º Ciclo' : c === '2_ciclo' ? '2º Ciclo' : '3º Ciclo'}
+                  {c === '1_ciclo' ? '1º Ciclo' : 
+                   c === '2_ciclo' ? '2º Ciclo' : 
+                   c === '3_ciclo' ? '3º Ciclo' : 'Funcionárias'}
                 </button>
               ))}
             </div>
@@ -100,7 +102,9 @@ export default function Ranking() {
 
           {classroom && (
             <Badge variant="secondary" className="mt-4 px-3 py-1 uppercase tracking-widest text-[10px] font-black">
-              {classroom.cycle === '1_ciclo' ? '1º Ciclo' : classroom.cycle === '2_ciclo' ? '2º Ciclo' : '3º Ciclo'}
+              {classroom.cycle === '1_ciclo' ? '1º Ciclo' : 
+               classroom.cycle === '2_ciclo' ? '2º Ciclo' : 
+               classroom.cycle === '3_ciclo' ? '3º Ciclo' : 'Funcionárias'}
             </Badge>
           )}
         </motion.div>

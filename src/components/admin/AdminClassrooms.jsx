@@ -124,6 +124,7 @@ export default function AdminClassrooms() {
             <option value="1_ciclo">1º Ciclo</option>
             <option value="2_ciclo">2º Ciclo</option>
             <option value="3_ciclo">3º Ciclo</option>
+            <option value="funcionarias">Funcionárias</option>
           </select>
           <Button type="submit" disabled={createMutation.isPending || !newName.trim()} className="gap-2 shrink-0">
             <Plus className="h-4 w-4" /> Criar
@@ -157,7 +158,9 @@ export default function AdminClassrooms() {
               </div>
               <div className="text-right mr-2 flex flex-col items-end">
                 <Badge variant="secondary" className="mb-1 text-[10px] uppercase tracking-wider">
-                  {c.cycle === '1_ciclo' ? '1º Ciclo' : c.cycle === '3_ciclo' ? '3º Ciclo' : '2º Ciclo'}
+                  {c.cycle === '1_ciclo' ? '1º Ciclo' : 
+                   c.cycle === '3_ciclo' ? '3º Ciclo' : 
+                   c.cycle === 'funcionarias' ? 'Funcionárias' : '2º Ciclo'}
                 </Badge>
                 <div className="flex items-center gap-1">
                   <p className="font-heading font-bold text-primary">{c.total_points || 0}</p>
